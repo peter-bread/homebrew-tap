@@ -32,3 +32,5 @@ jobs:
           # Custom GitHub access token with only the 'public_repo' scope enabled
           token: ${{ steps.app-token.outputs.token }}
           fork: false
+          formulae: >
+            gamon3
