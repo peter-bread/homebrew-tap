@@ -26,15 +26,11 @@ jobs:
       - name: Set up git
         uses: Homebrew/actions/git-user-config@main
 
-      # - name: List all formulae
-      #   id: formulae
-      #   run: echo "FORMULAE=$(ls Formula | sed 's/\.rb$//' | tr '\n' ' ')" >> $GITHUB_ENV
-
       - name: List all formulae
         id: formulae
         run: |
-          FORMULAE=$(find Formula -maxdepth 1 -name '*.rb' -exec basename {} .rb \; | tr '\n' ' ')
-          echo "FORMULAE=$FORMULAE" >> $GITHUB_ENV
+          FORMULAE="$(find Formula -maxdepth 1 -name '*.rb' -exec basename {} .rb \; | tr '\n' ' ')"
+          echo "formulae=$FORMULAE" >> "$GITHUB_OUTPUT"
 
       - name: Bump packages
         uses: Homebrew/actions/bump-packages@main
@@ -42,4 +38,4 @@ jobs:
           # Custom GitHub access token with only the 'public_repo' scope enabled
           token: ${{ steps.app-token.outputs.token }}
           fork: false
-          formulae: ${{ env.FORMULAE }}
+          formulae: ${{ steps.formulae.outputs.formulae }}
