@@ -32,6 +32,9 @@ jobs:
           FORMULAE="$(find Formula -maxdepth 1 -name '*.rb' -exec basename {} .rb \; | tr '\n' ' ')"
           echo "formulae=$FORMULAE" >> "$GITHUB_OUTPUT"
 
+      - name: Install dependencies
+        run: brew install go gh
+
       - name: Bump packages
         uses: Homebrew/actions/bump-packages@main
         with:
