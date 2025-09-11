@@ -20,7 +20,7 @@ jobs:
           app-id: ${{ secrets.HOMEBREW_APP_ID }}
           private-key: ${{ secrets.HOMEBREW_APP_KEY }}
           owner: peter-bread
-          repositories: homebrew/tap
+          repositories: homebrew-tap
 
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@main
