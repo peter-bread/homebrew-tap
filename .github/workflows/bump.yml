@@ -1,11 +1,9 @@
 ---
-name: Autobump (not really)
+name: Bump on release
 
 on:
-  # workflow_dispatch:
-
   repository_dispatch:
-    types: [my-event]
+    types: [bump]
 
 permissions:
   contents: write
@@ -25,8 +23,8 @@ jobs:
         with:
           app-id: ${{ secrets.HOMEBREW_APP_ID }}
           private-key: ${{ secrets.HOMEBREW_APP_KEY }}
-          owner: peter-bread
-          repositories: homebrew-tap
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
 
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@main
@@ -36,25 +34,12 @@ jobs:
       - name: Set up git
         uses: Homebrew/actions/git-user-config@main
 
-      # - name: List all formulae
-      #   id: formulae
-      #   run: |
-      #     FORMULAE="$(find Formula -maxdepth 1 -name '*.rb' -exec basename {} .rb \; | tr '\n' ' ')"
-      #     echo "formulae=$FORMULAE" >> "$GITHUB_OUTPUT"
-      #
-      # - name: Install dependencies
-      #   run: |
-      #
-      #     IFS=" " read -r -a formulae <<<"$FORMULAE"
-      #
-      #     for f in "${formulae[@]}"; do
-      #       brew deps --include-build --include-test "$f"
-      #     done
-      #       brew install "$(brew deps --include-build --include-test "$f")" || true
-      #     done
-      #   env:
-      #     FORMULAE: ${{ steps.formulae.outputs.formulae }}
-      #     HOMEBREW_NO_ENV_HINTS: 1
+      - name: Check formula ${{ env.FORMULA }} exists
+        run: |
+          if [ ! -f "Formula/$FORMULA.rb" ]; then
+            echo "Formula $FORMULA not found in tap. Exiting."
+            exit 1
+          fi
 
       - name: Install dependencies for ${{ env.FORMULA }}
         run: |
@@ -66,8 +51,6 @@ jobs:
         uses: Homebrew/actions/bump-packages@main
         with:
           # Custom GitHub access token with only the 'public_repo' scope enabled
-          # token: ${{ secrets.HOMEBREW_TAP_PAT }}
           token: ${{ steps.app-token.outputs.token }}
-          fork: false
           formulae: ${{ env.FORMULA }}
-          # formulae: ${{ steps.formulae.outputs.formulae }}
+          fork: false
