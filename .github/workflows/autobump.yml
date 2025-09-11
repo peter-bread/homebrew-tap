@@ -1,8 +1,11 @@
 ---
-name: Autobump
+name: Autobump (not really)
 
 on:
-  workflow_dispatch:
+  # workflow_dispatch:
+
+  repository_dispatch:
+    types: [my-event]
 
 permissions:
   contents: write
@@ -11,6 +14,9 @@ permissions:
 jobs:
   bump:
     runs-on: ubuntu-latest
+
+    env:
+      FORMULA: ${{ github.event.client_payload.formula }}
 
     steps:
 
@@ -30,14 +36,31 @@ jobs:
       - name: Set up git
         uses: Homebrew/actions/git-user-config@main
 
-      - name: List all formulae
-        id: formulae
-        run: |
-          FORMULAE="$(find Formula -maxdepth 1 -name '*.rb' -exec basename {} .rb \; | tr '\n' ' ')"
-          echo "formulae=$FORMULAE" >> "$GITHUB_OUTPUT"
+      # - name: List all formulae
+      #   id: formulae
+      #   run: |
+      #     FORMULAE="$(find Formula -maxdepth 1 -name '*.rb' -exec basename {} .rb \; | tr '\n' ' ')"
+      #     echo "formulae=$FORMULAE" >> "$GITHUB_OUTPUT"
+      #
+      # - name: Install dependencies
+      #   run: |
+      #
+      #     IFS=" " read -r -a formulae <<<"$FORMULAE"
+      #
+      #     for f in "${formulae[@]}"; do
+      #       brew deps --include-build --include-test "$f"
+      #     done
+      #       brew install "$(brew deps --include-build --include-test "$f")" || true
+      #     done
+      #   env:
+      #     FORMULAE: ${{ steps.formulae.outputs.formulae }}
+      #     HOMEBREW_NO_ENV_HINTS: 1
 
-      - name: Install dependencies
-        run: brew install go gh
+      - name: Install dependencies for ${{ env.FORMULA }}
+        run: |
+          brew deps --include-build --include-test "$FORMULA" | xargs brew install
+        env:
+          HOMEBREW_NO_ENV_HINTS: 1
 
       - name: Bump packages
         uses: Homebrew/actions/bump-packages@main
@@ -46,4 +69,5 @@ jobs:
           # token: ${{ secrets.HOMEBREW_TAP_PAT }}
           token: ${{ steps.app-token.outputs.token }}
           fork: false
-          formulae: ${{ steps.formulae.outputs.formulae }}
+          formulae: ${{ env.FORMULA }}
+          # formulae: ${{ steps.formulae.outputs.formulae }}
