@@ -26,11 +26,14 @@ jobs:
       - name: Set up git
         uses: Homebrew/actions/git-user-config@main
 
+      - name: List all formulae
+        id: formulae
+        run: echo "FORMULAE=$(ls Formula | sed 's/\.rb$//' | tr '\n' ' ')" >> $GITHUB_ENV
+
       - name: Bump packages
         uses: Homebrew/actions/bump-packages@main
         with:
           # Custom GitHub access token with only the 'public_repo' scope enabled
           token: ${{ steps.app-token.outputs.token }}
           fork: false
-          formulae: >
-            gamon3
+          formulae: ${{ env.FORMULAE }}
