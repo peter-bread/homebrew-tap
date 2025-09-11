@@ -1,8 +1,8 @@
 class Gamon3 < Formula
   desc "Automatically switch GitHub CLI account on `cd`"
   homepage "https://github.com/peter-bread/gamon3"
-  url "https://github.com/peter-bread/gamon3/archive/refs/tags/v1.0.7.tar.gz"
-  sha256 "7bfaa4099adae82158a889650b7f9657f3ce9bf873dc0d99d5c4149012ac9d68"
+  url "https://github.com/peter-bread/gamon3/archive/refs/tags/v1.0.8.tar.gz"
+  sha256 "664e348b27fb133b3c6de3d68e4c6bf88f01760e9200a50ca547fed342aa280e"
   license "MIT"
   head "https://github.com/peter-bread/gamon3.git", branch: "main"
 
