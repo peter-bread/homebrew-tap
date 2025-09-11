@@ -6,6 +6,11 @@ class Gamon3 < Formula
   license "MIT"
   head "https://github.com/peter-bread/gamon3.git", branch: "main"
 
+  bottle do
+    root_url "https://github.com/peter-bread/homebrew-tap/releases/download/gamon3-1.0.5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "9f0d5df893ae0176def4eef154523389e9505c6ec8c480019ac8e46a3b2d7ff0"
+  end
+
   depends_on "go" => :build
   depends_on "gh"
 
