@@ -7,8 +7,8 @@ class Gamon3 < Formula
   head "https://github.com/peter-bread/gamon3.git", branch: "main"
 
   bottle do
-    root_url "https://github.com/peter-bread/homebrew-tap/releases/download/gamon3-1.0.8"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "d2f55c294dca414eba3db81192addae5dbe060bccee51456beb6638201cb4831"
+    root_url "https://github.com/peter-bread/homebrew-tap/releases/download/gamon3-1.0.9"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "69e69f6b5ea54608942a0d49e8a9c4597567017d15446e658c55e59533237175"
   end
 
   depends_on "go" => :build
