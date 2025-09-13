@@ -21,8 +21,8 @@ jobs:
       - uses: actions/create-github-app-token@v2
         id: app-token
         with:
-          app-id: ${{ secrets.HOMEBREW_APP_ID }}
-          private-key: ${{ secrets.HOMEBREW_APP_KEY }}
+          app-id: ${{ secrets.CELLARMAN_APP_ID }}
+          private-key: ${{ secrets.CELLARMAN_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
 
