@@ -17,6 +17,15 @@ jobs:
       issues: read
       pull-requests: write
     steps:
+
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.CELLARMAN_APP_ID }}
+          private-key: ${{ secrets.CELLARMAN_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@main
         with:
@@ -35,6 +44,7 @@ jobs:
         uses: Homebrew/actions/git-try-push@main
         with:
           branch: main
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Delete branch
         if: github.event.pull_request.head.repo.fork == false
