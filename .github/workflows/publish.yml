@@ -16,7 +16,33 @@ jobs:
       contents: write
       issues: read
       pull-requests: write
+
     steps:
+
+      - name: Get test-bot status
+        id: test-bot-status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          CONCLUSION=$(gh run list \
+            --workflow tests.yml \
+            --branch "$REF" \
+            --json headSha,conclusion \
+            --jq ".[] | select(.headSha==$SHA) | .conclusion" |
+            head -n1)
+
+          echo "conclusion=$CONCLUSION" >> "$GITHUB_OUTPUT"
+
+      - name: Handle non-success
+        if: steps.test-bot-status.outputs.conclusion != 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr edit "$PR" --remove-label 'pr-pull'
+          gh pr comment --body "Removed \`pr-pull\` label because test bot has not succeeded"
 
       - uses: actions/create-github-app-token@v2
         id: app-token
