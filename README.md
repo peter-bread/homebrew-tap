@@ -6,7 +6,12 @@
 brew install peter-bread/tap/<formula>
 ```
 
-Or `brew tap peter-bread/tap` and then `brew install <formula>`.
+Or:
+
+```bash
+brew tap peter-bread/tap
+brew install <formula>
+```
 
 Or, in a `brew bundle` `Brewfile`:
 
