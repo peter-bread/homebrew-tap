@@ -2,7 +2,9 @@
 
 ## How do I install these formulae?
 
-`brew install peter-bread/tap/<formula>`
+```bash
+brew install peter-bread/tap/<formula>
+```
 
 Or `brew tap peter-bread/tap` and then `brew install <formula>`.
 
