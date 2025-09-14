@@ -19,6 +19,19 @@ jobs:
 
     steps:
 
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.CELLARMAN_APP_ID }}
+          private-key: ${{ secrets.CELLARMAN_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
       - name: Get test-bot status
         id: test-bot-status
         env:
@@ -44,19 +57,6 @@ jobs:
           gh pr edit "$PR" --remove-label 'pr-pull'
           gh pr comment --body "Removed \`pr-pull\` label because test bot has not succeeded"
           exit 1
-
-      - uses: actions/create-github-app-token@v2
-        id: app-token
-        with:
-          app-id: ${{ secrets.CELLARMAN_APP_ID }}
-          private-key: ${{ secrets.CELLARMAN_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: ${{ github.event.repository.name }}
-
-      - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@main
-        with:
-          token: ${{ steps.app-token.outputs.token }}
 
       - name: Set up git
         uses: Homebrew/actions/git-user-config@main
