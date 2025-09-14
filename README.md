@@ -1,4 +1,4 @@
-# Peter-bread Tap
+# The Brewery
 
 ## How do I install these formulae?
 
