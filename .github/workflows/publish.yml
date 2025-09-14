@@ -55,7 +55,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
         run: |
           gh pr edit "$PR" --remove-label 'pr-pull'
-          gh pr comment --body "Removed \`pr-pull\` label because test bot has not succeeded"
+          gh pr comment "$PR" --body "Removed \`pr-pull\` label because test bot has not succeeded"
           exit 1
 
       - name: Set up git
