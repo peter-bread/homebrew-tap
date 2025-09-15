@@ -7,8 +7,49 @@ on:
       - labeled
 
 jobs:
+
+  check-test-bot:
+    runs-on: ubuntu-22.04
+    outputs:
+      conclusion: ${{ steps.get-status.outputs.conclusion }}
+    permissions:
+      actions: read
+    steps:
+      - name: Get test-bot status
+        id: get-status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          CONCLUSION=$(gh run list \
+            --workflow tests.yml \
+            --branch "$REF" \
+            --json headSha,conclusion \
+            --jq ".[] | select(.headSha==$SHA) | .conclusion" |
+            head -n1)
+
+          echo "conclusion=$CONCLUSION" >> "$GITHUB_OUTPUT"
+
+  handle-non-success:
+    needs: check-test-bot
+    if: ${{ needs.check-test-bot.outputs.conclusion != 'success' }}
+    runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Remove label and comment on PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr edit "$PR" --remove-label 'pr-pull'
+          gh pr comment "$PR" --body "Removed \`pr-pull\` label because test bot has not succeeded"
+
   pr-pull:
-    if: contains(github.event.pull_request.labels.*.name, 'pr-pull')
+    needs: check-test-bot
+    if: >
+      contains(github.event.pull_request.labels.*.name, 'pr-pull') && ${{ needs.check-test-bot.outputs.conclusion == 'success' }}
     runs-on: ubuntu-22.04
     permissions:
       actions: read
@@ -31,32 +72,6 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@main
         with:
           token: ${{ steps.app-token.outputs.token }}
-
-      - name: Get test-bot status
-        id: test-bot-status
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SHA: ${{ github.event.pull_request.head.sha }}
-          REF: ${{ github.event.pull_request.head.ref }}
-        run: |
-          CONCLUSION=$(gh run list \
-            --workflow tests.yml \
-            --branch "$REF" \
-            --json headSha,conclusion \
-            --jq ".[] | select(.headSha==$SHA) | .conclusion" |
-            head -n1)
-
-          echo "conclusion=$CONCLUSION" >> "$GITHUB_OUTPUT"
-
-      - name: Handle non-success
-        if: steps.test-bot-status.outputs.conclusion != 'success'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR: ${{ github.event.pull_request.number }}
-        run: |
-          gh pr edit "$PR" --remove-label 'pr-pull'
-          gh pr comment "$PR" --body "Removed \`pr-pull\` label because test bot has not succeeded"
-          exit 1
 
       - name: Set up git
         uses: Homebrew/actions/git-user-config@main
