@@ -1,7 +1,7 @@
 # Contributing
 
 > [!IMPORTANT]
-> This is unfinished. Still
+> This is unfinished. Still...
 
 This workflow generates a new token for the Cellarman GitHub App.
 This token is used throughout the workflow. This is necessary because of the
