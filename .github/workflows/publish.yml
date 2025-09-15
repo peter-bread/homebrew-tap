@@ -29,7 +29,7 @@ jobs:
             --workflow tests.yml \
             --branch "$REF" \
             --json headSha,conclusion \
-            --jq ".[] | select(.headSha==$SHA) | .conclusion" |
+            --jq ".[] | select(.headSha==\"$SHA\") | .conclusion" |
             head -n1)
 
           echo "conclusion=$CONCLUSION" >> "$GITHUB_OUTPUT"
