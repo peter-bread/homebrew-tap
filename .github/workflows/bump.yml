@@ -43,7 +43,7 @@ jobs:
 
       - name: Install dependencies for ${{ env.FORMULA }}
         run: |
-          brew deps --include-build --include-test "$FORMULA" | xargs brew install
+          brew install $(brew deps --include-build --include-test "$FORMULA")
         env:
           HOMEBREW_NO_ENV_HINTS: 1
 
