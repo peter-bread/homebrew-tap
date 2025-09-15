@@ -14,7 +14,10 @@ jobs:
       conclusion: ${{ steps.get-status.outputs.conclusion }}
     permissions:
       actions: read
+      pull-requests: write
     steps:
+      - uses: actions/checkout@v5
+
       - name: Get test-bot status
         id: get-status
         env:
@@ -31,14 +34,8 @@ jobs:
 
           echo "conclusion=$CONCLUSION" >> "$GITHUB_OUTPUT"
 
-  handle-non-success:
-    needs: check-test-bot
-    if: ${{ needs.check-test-bot.outputs.conclusion != 'success' }}
-    runs-on: ubuntu-22.04
-    permissions:
-      pull-requests: write
-    steps:
       - name: Remove label and comment on PR
+        if: steps.get-status.outputs.conclusion != 'success'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
@@ -48,8 +45,7 @@ jobs:
 
   pr-pull:
     needs: check-test-bot
-    if: >
-      contains(github.event.pull_request.labels.*.name, 'pr-pull') && ${{ needs.check-test-bot.outputs.conclusion == 'success' }}
+    if: contains(github.event.pull_request.labels.*.name, 'pr-pull') && needs.check-test-bot.outputs.conclusion == 'success'
     runs-on: ubuntu-22.04
     permissions:
       actions: read
