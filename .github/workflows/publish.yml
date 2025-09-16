@@ -36,7 +36,7 @@ jobs:
     outputs:
       conclusion: ${{ steps.get-status.outputs.conclusion }}
       status: ${{ steps.get-status.outputs.status }}
-      updated-at: ${{ steps.get-status.outputs.updated-at }}
+      updated_at: ${{ steps.get-status.outputs.updated_at }}
     permissions:
       actions: read
       pull-requests: write
@@ -63,15 +63,17 @@ jobs:
 
           UPDATED_AT=$(date -u -d "$UPDATED_AT" +%s)
 
-          echo "conclusion=$CONCLUSION" >> "$GITHUB_OUTPUT"
-          echo "updated-at=$UPDATED_AT" >> "$GITHUB_OUTPUT"
-          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          {
+            echo "conclusion=$CONCLUSION"
+            echo "updated_at=$UPDATED_AT"
+            echo "status=$STATUS"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Remove label and comment on PR
         if: >
           !(steps.get-status.outputs.conclusion == 'success'
           && steps.get-status.outputs.status == 'completed'
-          && steps.get-status.outputs.updated-at < needs.get-label-added-time.outputs.time)
+          && steps.get-status.outputs.updated_at < needs.get-label-added-time.outputs.time)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
@@ -87,7 +89,7 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'pr-pull')
       && needs.check-test-bot.outputs.conclusion == 'success'
       && needs.check-test-bot.outputs.status == 'completed'
-      && needs.check-test-bot.outputs.updated-at < needs.get-label-added-time.outputs.time
+      && needs.check-test-bot.outputs.updated_at < needs.get-label-added-time.outputs.time
     runs-on: ubuntu-22.04
     permissions:
       actions: read
