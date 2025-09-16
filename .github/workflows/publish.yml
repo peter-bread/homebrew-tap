@@ -28,6 +28,8 @@ jobs:
 
           TIME=$(date -u -d "$TIME" +%s)
 
+          echo "$TIME"
+
           echo "time=$TIME" >> "$GITHUB_OUTPUT"
 
   check-test-bot:
@@ -62,6 +64,12 @@ jobs:
           STATUS=$(echo "$RUN" | jq -r '.status')
 
           UPDATED_AT=$(date -u -d "$UPDATED_AT" +%s)
+
+          {
+            echo "conclusion=$CONCLUSION"
+            echo "updated_at=$UPDATED_AT"
+            echo "status=$STATUS"
+          }
 
           {
             echo "conclusion=$CONCLUSION"
