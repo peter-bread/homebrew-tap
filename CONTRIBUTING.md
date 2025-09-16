@@ -76,6 +76,15 @@ git commit -m "<formula> X.Y.Z (new formula)"
 git push -u origin <formula>
 ```
 
+Next, open a pull request. This can be done on the website or via the
+`gh` CLI tool:
+
+<!-- TODO: Check if `--title` is needed or it default value is fine. -->
+
+```bash
+gh pr create --base main --head <formula>
+```
+
 Wait for `test-bot` to succeed. Then add the `pr-pull` label. For more
 information, see [Automation](#automation).
 
