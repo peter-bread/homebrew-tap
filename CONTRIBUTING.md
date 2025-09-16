@@ -16,6 +16,21 @@
 <!-- directy applied to `main`. For this reason you need to be very careful about -->
 <!-- keeping git history clean if you merge main back into PR branches. -->
 
+---
+
+> [!IMPORTANT]
+> This is only meant for me, [@peter-bread](https://github.com/peter-bread).
+> This tap is only for my software.
+>
+> If you are not me feel free to read to see how it all works.
+>
+> If I am doing something wrong, please open an issue, but do not open issues
+> or pull requests regarding the addition of new software. In that case, create
+> your own tap or contribute to
+> [homebrew-core](https://github.com/Homebrew/homebrew-core).
+
+---
+
 This is a guide for how this tap is operated.
 
 ## Summary
