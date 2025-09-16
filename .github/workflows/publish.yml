@@ -6,12 +6,9 @@ on:
     types:
       - labeled
 
-env:
-  RUNNER: ubuntu-22.04
-
 jobs:
   check-if-pull-can-happen:
-    runs-on: ${{ env.RUNNER }}
+    runs-on: ubuntu-22.04
 
     outputs:
       proceed: ${{ steps.evaluate.outputs.proceed }}
@@ -90,7 +87,7 @@ jobs:
           echo "proceed=true" >> "$GITHUB_OUTPUT"
 
   handle-fail:
-    runs-on: ${{ env.RUNNER }}
+    runs-on: ubuntu-22.04
 
     needs: check-if-pull-can-happen
 
@@ -117,7 +114,7 @@ jobs:
           EOF)"
 
   pr-pull:
-    runs-on: ${{ env.RUNNER }}
+    runs-on: ubuntu-22.04
 
     needs: check-if-pull-can-happen
 
