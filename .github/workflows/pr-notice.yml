@@ -1,0 +1,29 @@
+---
+name: PR Notice
+
+on:
+  pull_request_target:
+    types:
+      - opened
+
+jobs:
+  add-comment:
+    runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Add comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "$PR" --body "$(cat <<'EOF'
+          Thanks for opening this pull request!
+
+          Please wait for `brew test-bot / test-bot` to pass.
+          Then add the `pr-pull` label and Cellarman will handle the PR.
+
+          If you add the label before `test-bot` has succeeded, the `pr-pull`
+          job will not start and the label will be removed.
+          EOF
+          )"
