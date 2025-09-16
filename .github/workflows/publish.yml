@@ -22,9 +22,14 @@ jobs:
           REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
         run: |
-          TIME=$(gh api "repos/$REPO/issues/$PR/events" \
-            --jq '.[] | select(.event=="labeled" and .label.name=="pr-pull") | .created_at' |
-            tail -n1)
+          TIMES=$(gh api "repos/$REPO/issues/$PR/events" \
+            --jq '.[] | select(.event=="labeled" and .label.name=="pr-pull") | .created_at')
+
+          echo "$TIMES"
+
+          TIME=$(echo "$TIMES" | tail -n1)
+
+          echo "$TIME"
 
           TIME=$(date -u -d "$TIME" +%s)
 
