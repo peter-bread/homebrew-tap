@@ -8,10 +8,34 @@ on:
 
 jobs:
 
+  get-label-added-time:
+    runs-on: ubuntu-22.04
+    outputs:
+      time: ${{ steps.get-time.outputs.time }}
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v5
+      - name: Get time
+        id: get-time
+        env:
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          TIME=$(gh api "repos/$REPO/issues/$PR/events" \
+            --jq '.[] | select(.event=="labeled" and .label.name=="pr-pull") | .created_at' |
+            tail -n1)
+
+          TIME=$(date -u -d "$TIME" +%s)
+
+          echo "time=$TIME" >> "$GITHUB_OUTPUT"
+
   check-test-bot:
+    needs: get-label-added-time
     runs-on: ubuntu-22.04
     outputs:
       conclusion: ${{ steps.get-status.outputs.conclusion }}
+      updated-at: ${{ steps.get-status.outputs.updated-at }}
     permissions:
       actions: read
       pull-requests: write
@@ -25,17 +49,23 @@ jobs:
           SHA: ${{ github.event.pull_request.head.sha }}
           REF: ${{ github.event.pull_request.head.ref }}
         run: |
-          CONCLUSION=$(gh run list \
+          RUN=$(gh run list \
             --workflow tests.yml \
             --branch "$REF" \
-            --json headSha,conclusion \
-            --jq ".[] | select(.headSha==\"$SHA\") | .conclusion" |
+            --json headSha,conclusion,updatedAt \
+            --jq ".[] | select(.headSha==\"$SHA\")" |
             head -n1)
 
+          CONCLUSION=$(echo "$RUN" | jq -r '.conclusion')
+          UPDATED_AT=$(echo "$RUN" | jq -r '.updatedAt')
+
+          UPDATED_AT=$(date -u -d "$UPDATED_AT" +%s)
+
           echo "conclusion=$CONCLUSION" >> "$GITHUB_OUTPUT"
+          echo "updated-at=$UPDATED_AT" >> "$GITHUB_OUTPUT"
 
       - name: Remove label and comment on PR
-        if: steps.get-status.outputs.conclusion != 'success'
+        if: steps.get-status.outputs.conclusion != 'success' || steps.get-status.outputs.updated-at >= needs.get-label-added-time.outputs.time
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
@@ -44,8 +74,11 @@ jobs:
           gh pr comment "$PR" --body "Removed \`pr-pull\` label because test bot has not succeeded"
 
   pr-pull:
-    needs: check-test-bot
-    if: contains(github.event.pull_request.labels.*.name, 'pr-pull') && needs.check-test-bot.outputs.conclusion == 'success'
+    needs:
+      - check-test-bot
+      - get-label-added-time
+    if: >
+      contains(github.event.pull_request.labels.*.name, 'pr-pull') && needs.check-test-bot.outputs.conclusion == 'success' && needs.check-test-bot.outputs.updated-at < needs.get-label-added-time.outputs.time
     runs-on: ubuntu-22.04
     permissions:
       actions: read
