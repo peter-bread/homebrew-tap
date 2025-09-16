@@ -66,7 +66,7 @@ information, see [Automation](#automation).
 
 ## Manually updating a formula
 
-This is for making changes to the formula that are _NOT_ version bumps.
+This is for making changes to a formula that are _NOT_ version bumps.
 
 This is essentially the same workflow as [adding a new
 formula](#adding-a-new-formula) but without the `brew create` step.
