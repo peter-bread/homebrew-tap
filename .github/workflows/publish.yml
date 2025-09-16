@@ -21,6 +21,7 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TIMES=$(gh api "repos/$REPO/issues/$PR/events" \
             --jq '.[] | select(.event=="labeled" and .label.name=="pr-pull") | .created_at')
