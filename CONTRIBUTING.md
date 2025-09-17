@@ -169,9 +169,7 @@ workflows as well as [rulesets](#rulesets) to protect the `main` branch.
 
 This section will explain each of the workflows.
 
-### Bump
-
-[Workflow](./.github/workflows/bump.yml).
+### [Bump](./.github/workflows/bump.yml)
 
 Bump is responsible to creating pull requests that bump a formula. This means
 that the version number and checksum are updated.
@@ -191,24 +189,18 @@ It:
 
 This opens a pull request named `<formula> <version>`.
 
-### PR Notice
-
-[Workflow](./.github/workflows/pr-notice.yml).
+### [PR Notice](./.github/workflows/pr-notice.yml)
 
 After a pull request is created, this adds a comment to remind you to wait for
 `test-bot` to succeed before adding the `pr-pull` label.
 
-### Tests
-
-[Workflow](./.github/workflows/tests.yml).
+### [Tests](./.github/workflows/tests.yml)
 
 Tests is responsible for validating formulae and building bottles.
 
 It runs whenever a PR is opened or updated, and whenever `main` is updated.
 
-### Publish
-
-[Workflow](./.github/workflows/publish.yml).
+### [Publish](./.github/workflows/publish.yml)
 
 Publish is responsible for "merging" pull requests. Inside it uses `brew
 pr-pull`, so it doesn't actually merge pull requests. Instead, it cherry picks
@@ -239,9 +231,7 @@ It first decides whether or not it is safe to run the `pr-pull` job:
 > Unless you disable branch protection, this is the only way to
 > make changes this repository.
 
-## Rulesets
-
-[Rulesets](https://github.com/peter-bread/homebrew-tap/rules?ref=refs%2Fheads%2Fmain).
+## [Rulesets](https://github.com/peter-bread/homebrew-tap/rules?ref=refs%2Fheads%2Fmain)
 
 There is a rule that blocks anyone (i.e. me) from pushing straight to `main` or
 prematurely merging pull requests manually. The only exemption is Cellarman.
