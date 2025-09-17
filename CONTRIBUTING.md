@@ -169,18 +169,75 @@ This section will explain each of the workflows.
 
 [Workflow](./.github/workflows/bump.yml).
 
-### Tests
+Bump is responsible to creating pull requests that bump a formula. This means
+that the version number and checksum are updated.
 
-[Workflow](./.github/workflows/tests.yml).
+It runs on `bump` events from `repository_dispatch`es. It expects the client
+payload to be a JSON object containing the key `formula` with a value being
+the name of the formula.
 
-### Publish
+It:
 
-[Workflow](./.github/workflows/publish.yml).
+- Generates a Cellarman token
+- Sets up Homebrew
+- Sets up git
+- Checks the formula actually exists in the tap
+- Installs dependencies for the formula
+- Bumps the formula
+
+This opens a pull request named `<formula> <version>`.
 
 ### PR Notice
 
 [Workflow](./.github/workflows/pr-notice.yml).
 
+### Tests
+
+[Workflow](./.github/workflows/tests.yml).
+
+Tests is responsible for validating formulae and building bottles.
+
+It runs whenever a PR is opened or updated, and whenever `main` is updated.
+
+### Publish
+
+[Workflow](./.github/workflows/publish.yml).
+
+Publish is responsible for "merging" pull requests. Inside it uses `brew
+pr-pull`, so it doesn't actually merge pull requests. Instead, it cherry picks
+commits onto `main` and then closes the PR and deletes the branch. This seems
+strange at fist, but I suppose if you have lots of formulae all being updated
+at once, this way you don't need to worry about keeping branches up to date or
+potential merge conflicts.
+
+This workflow is triggered by adding the `pr-pull` label to a pull request.
+
+It first decides whether or not it is safe to run the `pr-pull` job:
+
+1. Gets the time that the `pr-pull` label was added to the PR
+2. Gets the `status`, `conclusion` and `updatedAt` properties of the latest
+   `test-bot` workflow on the PR branch.
+3. To perform `pr-pull`, three conditions must be satisfied:
+   - `conclusion == 'success'`
+   - `status == 'completed'`
+   - The `pr-pull` label was added _after_ the `test-bot` workflow finished.
+4. If all three of these conditions are met, the commits are cherry picked and
+   the PR is closed.
+5. If any of these conditions are not met, the `pr-pull` label is removed from
+   the PR and a comment is added reminding you to only add the label once
+   `test-bot` has succeeded.
+
+> [!IMPORTANT]
+> Unless you disable branch protection, this is the only way to make changes
+> this repository.
+
 ## Rulesets
 
 [Rulesets](https://github.com/peter-bread/homebrew-tap/rules?ref=refs%2Fheads%2Fmain).
+
+There is a rule that blocks anyone (i.e. me) from pushing straight to `main` or
+prematurely merging pull requests manually. The only exemption is Cellarman.
+And the only way Cellarman can interact with the repository is through the
+[`pr-pull`](#publish) job.
+
+This means that the only way to update `main` is through PR's, using `pr-pull`.
