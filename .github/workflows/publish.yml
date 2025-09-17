@@ -17,9 +17,6 @@ jobs:
       actions: read
       pull-requests: write
 
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     steps:
       - uses: actions/checkout@v5
 
@@ -28,6 +25,7 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           RAW_TIMES=$(gh api "repos/$REPO/issues/$PR/events" \
             --jq '.[] | select(.event=="labeled" and .label.name=="pr-pull") | .created_at')
@@ -52,6 +50,7 @@ jobs:
         env:
           SHA: ${{ github.event.pull_request.head.sha }}
           REF: ${{ github.event.pull_request.head.ref }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           RUN=$(gh run list \
             --workflow tests.yml \
@@ -94,14 +93,13 @@ jobs:
     if: >
       !(needs.check-if-pull-can-happen.outputs.proceed == 'true')
 
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      PR: ${{ github.event.pull_request.number }}
-
     steps:
       - uses: actions/checkout@v5
 
       - name: Remove label and add comment on PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
         run: |
           gh pr edit "$PR" --remove-label 'pr-pull'
           gh pr comment "$PR" --body "$(cat <<'EOF'
@@ -163,144 +161,3 @@ jobs:
         env:
           BRANCH: ${{ github.event.pull_request.head.ref }}
         run: git push --delete origin "$BRANCH"
-
-# jobs:
-#
-#   get-label-added-time:
-#     runs-on: ubuntu-22.04
-#     outputs:
-#       time: ${{ steps.get-time.outputs.time }}
-#     permissions:
-#       pull-requests: read
-#     steps:
-#       - uses: actions/checkout@v5
-#       - name: Get time
-#         id: get-time
-#         env:
-#           REPO: ${{ github.repository }}
-#           PR: ${{ github.event.pull_request.number }}
-#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         run: |
-#           TIMES=$(gh api "repos/$REPO/issues/$PR/events" \
-#             --jq '.[] | select(.event=="labeled" and .label.name=="pr-pull") | .created_at')
-#
-#           echo "$TIMES"
-#
-#           TIME=$(echo "$TIMES" | tail -n1)
-#
-#           echo "$TIME"
-#
-#           TIME=$(date -u -d "$TIME" +%s)
-#
-#           echo "$TIME"
-#
-#           echo "time=$TIME" >> "$GITHUB_OUTPUT"
-#
-#   check-test-bot:
-#     needs: get-label-added-time
-#     runs-on: ubuntu-22.04
-#     outputs:
-#       conclusion: ${{ steps.get-status.outputs.conclusion }}
-#       status: ${{ steps.get-status.outputs.status }}
-#       updated_at: ${{ steps.get-status.outputs.updated_at }}
-#     permissions:
-#       actions: read
-#       pull-requests: write
-#     steps:
-#       - uses: actions/checkout@v5
-#
-#       - name: Get test-bot status
-#         id: get-status
-#         env:
-#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#           SHA: ${{ github.event.pull_request.head.sha }}
-#           REF: ${{ github.event.pull_request.head.ref }}
-#         run: |
-#           RUN=$(gh run list \
-#             --workflow tests.yml \
-#             --branch "$REF" \
-#             --json headSha,conclusion,updatedAt,status \
-#             --jq ".[] | select(.headSha==\"$SHA\")" |
-#             head -n1)
-#
-#           CONCLUSION=$(echo "$RUN" | jq -r '.conclusion')
-#           UPDATED_AT=$(echo "$RUN" | jq -r '.updatedAt')
-#           STATUS=$(echo "$RUN" | jq -r '.status')
-#
-#           UPDATED_AT=$(date -u -d "$UPDATED_AT" +%s)
-#
-#           {
-#             echo "conclusion=$CONCLUSION"
-#             echo "updated_at=$UPDATED_AT"
-#             echo "status=$STATUS"
-#           }
-#
-#           {
-#             echo "conclusion=$CONCLUSION"
-#             echo "updated_at=$UPDATED_AT"
-#             echo "status=$STATUS"
-#           } >> "$GITHUB_OUTPUT"
-#
-#       - name: Remove label and comment on PR
-#         if: >
-#           !(steps.get-status.outputs.conclusion == 'success'
-#           && steps.get-status.outputs.status == 'completed'
-#           && steps.get-status.outputs.updated_at < needs.get-label-added-time.outputs.time)
-#         env:
-#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#           PR: ${{ github.event.pull_request.number }}
-#         run: |
-#           gh pr edit "$PR" --remove-label 'pr-pull'
-#           gh pr comment "$PR" --body "Removed \`pr-pull\` label because test bot has not succeeded"
-#
-#   pr-pull:
-#     needs:
-#       - check-test-bot
-#       - get-label-added-time
-#     if: >
-#       contains(github.event.pull_request.labels.*.name, 'pr-pull')
-#       && needs.check-test-bot.outputs.conclusion == 'success'
-#       && needs.check-test-bot.outputs.status == 'completed'
-#       && needs.check-test-bot.outputs.updated_at < needs.get-label-added-time.outputs.time
-#     runs-on: ubuntu-22.04
-#     permissions:
-#       actions: read
-#       checks: read
-#       contents: write
-#       issues: read
-#       pull-requests: write
-#
-#     steps:
-#
-#       - uses: actions/create-github-app-token@v2
-#         id: app-token
-#         with:
-#           app-id: ${{ secrets.CELLARMAN_APP_ID }}
-#           private-key: ${{ secrets.CELLARMAN_APP_PRIVATE_KEY }}
-#           owner: ${{ github.repository_owner }}
-#           repositories: ${{ github.event.repository.name }}
-#
-#       - name: Set up Homebrew
-#         uses: Homebrew/actions/setup-homebrew@main
-#         with:
-#           token: ${{ steps.app-token.outputs.token }}
-#
-#       - name: Set up git
-#         uses: Homebrew/actions/git-user-config@main
-#
-#       - name: Pull bottles
-#         env:
-#           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#           PULL_REQUEST: ${{ github.event.pull_request.number }}
-#         run: brew pr-pull --debug --tap="$GITHUB_REPOSITORY" "$PULL_REQUEST"
-#
-#       - name: Push commits
-#         uses: Homebrew/actions/git-try-push@main
-#         with:
-#           branch: main
-#
-#       - name: Delete branch
-#         if: github.event.pull_request.head.repo.fork == false
-#         env:
-#           BRANCH: ${{ github.event.pull_request.head.ref }}
-#         run: git push --delete origin "$BRANCH"
