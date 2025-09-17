@@ -40,6 +40,10 @@ This is a guide for how this tap is operated.
    `test-bot` has passed.
 1. Only the Cellarman GitHub App has permission to write to `main`.
 
+With all the validation in the `publish` workflow and the branch protection
+ruleset, it should be impossible to ever push bad code or bad formulae onto
+``
+
 ## Adding a new formula
 
 Tap the repository if you haven't already:
@@ -117,12 +121,11 @@ In your repository settings, add the `App ID` and private key for
 [Cellarman](https://github.com/settings/apps/peter-bread-cellarman) to your
 variables and secrets respectively.
 
-Create a new job that depends on the success of the release job. This job
-will create a token using the Cellarman App which has the minimum required
-permissions to send a repository dispatch to this homebrew tap. It should
-send a `bump` event with a payload containing the key `formula`, whose value
-should be the name of the formula, which will normally be the name of the
-repository.
+Create a new job that depends on the success of the release job. This job will
+create a token using the Cellarman App which has the minimum required
+permissions to send a repository dispatch to this homebrew tap. It should send
+a `bump` event with a payload containing the key `formula`, whose value should
+be the name of the formula, which will normally be the name of the repository.
 
 Below is an example job:
 
@@ -160,8 +163,8 @@ bump-homebrew-formula:
 ## Automation
 
 This repository is meant to be as automated as possible and as hard to make a
-mistake as possible. This is achieved using a number of GitHub Actions workflows
-as well as [rulesets](#rulesets) to protect the `main` branch.
+mistake as possible. This is achieved using a number of GitHub Actions
+workflows as well as [rulesets](#rulesets) to protect the `main` branch.
 
 This section will explain each of the workflows.
 
@@ -173,8 +176,8 @@ Bump is responsible to creating pull requests that bump a formula. This means
 that the version number and checksum are updated.
 
 It runs on `bump` events from `repository_dispatch`es. It expects the client
-payload to be a JSON object containing the key `formula` with a value being
-the name of the formula.
+payload to be a JSON object containing the key `formula` with a value being the
+name of the formula.
 
 It:
 
@@ -190,6 +193,9 @@ This opens a pull request named `<formula> <version>`.
 ### PR Notice
 
 [Workflow](./.github/workflows/pr-notice.yml).
+
+After a pull request is created, this adds a comment to remind you to wait for
+`test-bot` to succeed before adding the `pr-pull` label.
 
 ### Tests
 
@@ -227,9 +233,8 @@ It first decides whether or not it is safe to run the `pr-pull` job:
    the PR and a comment is added reminding you to only add the label once
    `test-bot` has succeeded.
 
-> [!IMPORTANT]
-> Unless you disable branch protection, this is the only way to make changes
-> this repository.
+> [!IMPORTANT] Unless you disable branch protection, this is the only way to
+> make changes this repository.
 
 ## Rulesets
 
@@ -241,3 +246,6 @@ And the only way Cellarman can interact with the repository is through the
 [`pr-pull`](#publish) job.
 
 This means that the only way to update `main` is through PR's, using `pr-pull`.
+
+If you ever want to push directly to `main`, you have to consciously and
+intentionally, with 2FA, disable the ruleset.
