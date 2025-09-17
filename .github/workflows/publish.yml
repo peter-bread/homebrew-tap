@@ -104,14 +104,13 @@ jobs:
       - name: Remove label and add comment on PR
         run: |
           gh pr edit "$PR" --remove-label 'pr-pull'
-          gh pr comment "$PR" --body "$(cat <<'EOF'
-          Removed `pr-pull`  label from this PR. This is because at least one of the following is true:
-          1. `test-bot` does not have a status of `completed`
-          2. `test-bot` does not have a conclusion of `success`
-          3. `pr-pull` label was added before `test-bot` workflow has finished.
+          gh pr comment "$PR" --body "
+          Removed \`pr-pull\`  label from this PR. This is because at least one of the following is true:
+          1. \`test-bot\` does not have a status of \`completed\`
+          2. \`test-bot\` does not have a conclusion of \`success\`
+          3. \`pr-pull\` label was added before \`test-bot\` workflow has finished.
 
-          Please wait until `test-bot` has succeeded before adding the `pr-pull` label.
-          EOF)"
+          Please wait until \`test-bot\` has succeeded before adding the \`pr-pull\` label."
 
   pr-pull:
     runs-on: ubuntu-22.04
