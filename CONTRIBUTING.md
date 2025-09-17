@@ -19,6 +19,7 @@
 ---
 
 > [!IMPORTANT]
+>
 > This is only meant for me, [@peter-bread](https://github.com/peter-bread).
 > This tap is only for my software.
 >
@@ -233,7 +234,9 @@ It first decides whether or not it is safe to run the `pr-pull` job:
    the PR and a comment is added reminding you to only add the label once
    `test-bot` has succeeded.
 
-> [!IMPORTANT] Unless you disable branch protection, this is the only way to
+> [!IMPORTANT]
+>
+> Unless you disable branch protection, this is the only way to
 > make changes this repository.
 
 ## Rulesets
