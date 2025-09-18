@@ -36,7 +36,8 @@ jobs:
 
           LAST_TIME=$(echo "$RAW_TIMES" | tail -n1)
 
-          echo "Last time: $LAST_TIME\n"
+          echo "Last time: $LAST_TIME"
+          echo
 
           # Convert to Epoch time.
           TIME=$(date -u -d "$LAST_TIME" +%s)
@@ -59,7 +60,8 @@ jobs:
             --jq ".[] | select(.headSha==\"$SHA\")" |
             head -n1)
 
-          echo "Run: $RUN\n"
+          echo "Run: $RUN"
+          echo
 
           STATUS=$(echo "$RUN" | jq -r '.status')
           CONCLUSION=$(echo "$RUN" | jq -r '.conclusion')
