@@ -93,6 +93,9 @@ jobs:
     if: >
       !(needs.check-if-pull-can-happen.outputs.proceed == 'true')
 
+    permissions:
+      pull-requests: write
+
     steps:
       - uses: actions/checkout@v5
 
