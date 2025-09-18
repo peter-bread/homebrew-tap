@@ -23,10 +23,8 @@ jobs:
           gh pr comment "$PR" --body "$(cat <<'EOF'
           Thanks for opening this pull request!
 
-          Please wait for `brew test-bot / test-bot` to pass.
-          Then add the `pr-pull` label and Cellarman will handle the PR.
+          Please wait for `brew test-bot / test-bot` to pass. Then add the `pr-pull` label and Cellarman will handle the PR.
 
-          If you add the label before `test-bot` has succeeded, the `pr-pull`
-          job will not start and the label will be removed.
+          If you add the label before `test-bot` has succeeded, the `pr-pull` job will not start and the label will be removed.
           EOF
           )"
