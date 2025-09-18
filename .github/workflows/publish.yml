@@ -36,14 +36,14 @@ jobs:
 
           LAST_TIME=$(echo "$RAW_TIMES" | tail -n1)
 
-          echo "Last time: $LAST_TIME"
+          echo "Last time: $LAST_TIME\n"
 
           # Convert to Epoch time.
           TIME=$(date -u -d "$LAST_TIME" +%s)
 
-          echo "Epoch time: $TIME"
+          echo "OUTPUTS:"
 
-          echo "time=$TIME" >> "$GITHUB_OUTPUT"
+          echo "time=$TIME" | tee -a "$GITHUB_OUTPUT"
 
       - name: Check test-bot
         id: test-bot
@@ -59,9 +59,7 @@ jobs:
             --jq ".[] | select(.headSha==\"$SHA\")" |
             head -n1)
 
-          echo "Run:"
-          echo "$RUN"
-          echo
+          echo "Run: $RUN\n"
 
           STATUS=$(echo "$RUN" | jq -r '.status')
           CONCLUSION=$(echo "$RUN" | jq -r '.conclusion')
@@ -69,6 +67,8 @@ jobs:
 
           # Convert to Epoch time.
           UPDATED_AT=$(date -u -d "$UPDATED_AT" +%s)
+
+          echo "OUTPUTS:"
 
           {
             echo "status=$STATUS"
