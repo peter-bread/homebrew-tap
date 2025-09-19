@@ -134,19 +134,18 @@ jobs:
       pull-requests: write
 
     steps:
-      # - uses: actions/create-github-app-token@v2
-      #   id: app-token
-      #   with:
-      #     app-id: ${{ secrets.CELLARMAN_APP_ID }}
-      #     private-key: ${{ secrets.CELLARMAN_APP_PRIVATE_KEY }}
-      #     owner: ${{ github.repository_owner }}
-      #     repositories: ${{ github.event.repository.name }}
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ secrets.CELLARMAN_APP_ID }}
+          private-key: ${{ secrets.CELLARMAN_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
 
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@main
-        # with:
-        # token: ${{ steps.app-token.outputs.token }}
-        # token: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Set up git
         uses: Homebrew/actions/git-user-config@main
@@ -167,3 +166,173 @@ jobs:
         env:
           BRANCH: ${{ github.event.pull_request.head.ref }}
         run: git push --delete origin "$BRANCH"
+
+# ---
+# name: brew pr-pull
+#
+# on:
+#   pull_request_target:
+#     types:
+#       - labeled
+#
+# jobs:
+#   check-if-pull-can-happen:
+#     runs-on: ubuntu-22.04
+#
+#     outputs:
+#       proceed: ${{ steps.evaluate.outputs.proceed }}
+#
+#     permissions:
+#       actions: read
+#       pull-requests: read
+#
+#     steps:
+#       - uses: actions/checkout@v5
+#
+#       - name: Get time
+#         id: get-time
+#         env:
+#           REPO: ${{ github.repository }}
+#           PR: ${{ github.event.pull_request.number }}
+#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         run: |
+#           RAW_TIMES=$(gh api "repos/$REPO/issues/$PR/events" \
+#             --jq '.[] | select(.event=="labeled" and .label.name=="pr-pull") | .created_at')
+#
+#           echo "Raw times:"
+#           echo "$RAW_TIMES"
+#           echo
+#
+#           LAST_TIME=$(echo "$RAW_TIMES" | tail -n1)
+#
+#           echo "Last time: $LAST_TIME"
+#           echo
+#
+#           # Convert to Epoch time.
+#           TIME=$(date -u -d "$LAST_TIME" +%s)
+#
+#           echo "OUTPUTS:"
+#
+#           echo "time=$TIME" | tee -a "$GITHUB_OUTPUT"
+#
+#       - name: Check test-bot
+#         id: test-bot
+#         env:
+#           SHA: ${{ github.event.pull_request.head.sha }}
+#           REF: ${{ github.event.pull_request.head.ref }}
+#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         run: |
+#           RUN=$(gh run list \
+#             --workflow tests.yml \
+#             --branch "$REF" \
+#             --json headSha,status,conclusion,updatedAt \
+#             --jq ".[] | select(.headSha==\"$SHA\")" |
+#             head -n1)
+#
+#           echo "Run: $RUN"
+#           echo
+#
+#           STATUS=$(echo "$RUN" | jq -r '.status')
+#           CONCLUSION=$(echo "$RUN" | jq -r '.conclusion')
+#           UPDATED_AT=$(echo "$RUN" | jq -r '.updatedAt')
+#
+#           # Convert to Epoch time.
+#           UPDATED_AT=$(date -u -d "$UPDATED_AT" +%s)
+#
+#           echo "OUTPUTS:"
+#
+#           {
+#             echo "status=$STATUS"
+#             echo "conclusion=$CONCLUSION"
+#             echo "updated_at=$UPDATED_AT"
+#           } | tee -a "$GITHUB_OUTPUT"
+#
+#       - name: Evaluate result
+#         id: evaluate
+#         if: >
+#           steps.test-bot.outputs.conclusion == 'success'
+#           && steps.test-bot.outputs.status == 'completed'
+#           && steps.test-bot.outputs.updated_at < steps.get-time.outputs.time
+#         run: |
+#           echo "proceed=true" >> "$GITHUB_OUTPUT"
+#
+#   handle-fail:
+#     runs-on: ubuntu-22.04
+#
+#     needs: check-if-pull-can-happen
+#
+#     if: >
+#       !(needs.check-if-pull-can-happen.outputs.proceed == 'true')
+#
+#     permissions:
+#       pull-requests: write
+#
+#     steps:
+#       - uses: actions/checkout@v5
+#
+#       - name: Remove label and add comment on PR
+#         env:
+#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           PR: ${{ github.event.pull_request.number }}
+#         run: |
+#           gh pr edit "$PR" --remove-label 'pr-pull'
+#           gh pr comment "$PR" --body "$(cat <<'EOF'
+#           Removed `pr-pull`  label from this PR. This is because at least one of the following is true:
+#           1. `test-bot` does not have a status of `completed`
+#           2. `test-bot` does not have a conclusion of `success`
+#           3. `pr-pull` label was added before `test-bot` workflow has finished
+#
+#           Please wait until `test-bot` has succeeded before adding the `pr-pull` label.
+#           EOF
+#           )"
+#
+#   pr-pull:
+#     runs-on: ubuntu-22.04
+#
+#     needs: check-if-pull-can-happen
+#
+#     if: >
+#       contains(github.event.pull_request.labels.*.name, 'pr-pull')
+#       && needs.check-if-pull-can-happen.outputs.proceed == 'true'
+#
+#     permissions:
+#       actions: read
+#       checks: read
+#       contents: write
+#       issues: read
+#       pull-requests: write
+#
+#     steps:
+#       # - uses: actions/create-github-app-token@v2
+#       #   id: app-token
+#       #   with:
+#       #     app-id: ${{ secrets.CELLARMAN_APP_ID }}
+#       #     private-key: ${{ secrets.CELLARMAN_APP_PRIVATE_KEY }}
+#       #     owner: ${{ github.repository_owner }}
+#       #     repositories: ${{ github.event.repository.name }}
+#
+#       - name: Set up Homebrew
+#         uses: Homebrew/actions/setup-homebrew@main
+#         # with:
+#         # token: ${{ steps.app-token.outputs.token }}
+#         # token: ${{ secrets.GITHUB_TOKEN }}
+#
+#       - name: Set up git
+#         uses: Homebrew/actions/git-user-config@main
+#
+#       - name: Pull bottles
+#         env:
+#           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           PULL_REQUEST: ${{ github.event.pull_request.number }}
+#         run: brew pr-pull --debug --tap="$GITHUB_REPOSITORY" "$PULL_REQUEST"
+#
+#       - name: Push commits
+#         uses: Homebrew/actions/git-try-push@main
+#         with:
+#           branch: main
+#
+#       - name: Delete branch
+#         if: github.event.pull_request.head.repo.fork == false
+#         env:
+#           BRANCH: ${{ github.event.pull_request.head.ref }}
+#         run: git push --delete origin "$BRANCH"
