@@ -21,13 +21,25 @@ This is a guide for how this tap is operated.
 ## Summary
 
 1. All changes must be made via pull requests.
-1. Pull requests can only be merged[\*](#publish) by adding the `pr-pull` label after
-   `test-bot` has passed.
+1. Pull requests can only be merged[\*](#publish) by adding the `pr-pull` label
+   after `test-bot` has passed.
 1. Only the Cellarman GitHub App has permission to write to `main`.
 
 With all the validation in the `publish` workflow and the branch protection
-ruleset, it should be impossible to ever push bad code or bad formulae onto
-``
+ruleset, it should be impossible to ever push bad code or bad formulae to
+`main`.
+
+Other things to be aware of:
+
+1.  GitHub Releases **_CANNOT_** be immutable (check repository settings).
+1.  The `HOMEBREW_GITHUB_API_TOKEN` needs the following permissions to pull
+    bottles:
+    - fine-grained:
+      - contents: `read/write`
+      - pull Requests: `read/write`
+      - actions: `read`
+    - PAT:
+      - repo
 
 ## Adding a new formula
 
@@ -99,12 +111,13 @@ git push -u origin <formula>-<desc>
 
 ## Bumping a formula
 
-In the repository containing the source code of a formula???, ensure you have a
-workflow that creates tags and GitHub Releases.
+Ensure you have a workflow that creates tags and GitHub Releases in the
+repository that contains the source code for the software you are creating a
+formula for.
 
 In your repository settings, add the `App ID` and private key for
 [Cellarman](https://github.com/settings/apps/peter-bread-cellarman) to your
-variables and secrets respectively.
+(variables and) secrets respectively.
 
 Create a new job that depends on the success of the release job. This job will
 create a token using the Cellarman App which has the minimum required
@@ -144,6 +157,12 @@ bump-homebrew-formula:
             "formula": "${{ env.REPO }}"
           }
 ```
+
+> [!NOTE]
+> I may move this job to its own repository, either as a Composite Action or a
+> Reusable Workflow.
+>
+> In either case, this documentation will be updated accordingly.
 
 ## Automation
 
