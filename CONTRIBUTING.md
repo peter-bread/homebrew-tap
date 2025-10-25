@@ -245,3 +245,7 @@ This means that the only way to update `main` is through PR's, using `pr-pull`.
 
 If you ever want to push directly to `main`, you have to consciously and
 intentionally, with 2FA, disable the ruleset.
+
+## Acknowledgments
+
+- https://brew.sh/2020/11/18/homebrew-tap-with-bottles-uploaded-to-github-releases/
