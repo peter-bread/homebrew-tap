@@ -31,8 +31,12 @@ class Gamon3 < Formula
   end
 
   test do
-    os   = OS.mac? ? "darwin" : "linux"
-    arch = Hardware::CPU.arch
+    os       = OS.mac? ? "darwin" : "linux"
+    arch_raw = Hardware::CPU.arch
+
+    arch = case arch_raw
+           when :x86_64 then "amd64"
+           else arch.to_s
 
     assert_match "gamon3 version #{version} #{os}-#{arch}", shell_output("#{bin}/gamon3 --version")
   end
