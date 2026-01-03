@@ -35,8 +35,8 @@ class Gamon3 < Formula
     arch_raw = Hardware::CPU.arch
 
     arch = case arch_raw
-      when :x86_64 then "amd64"
-      else arch.to_s
+    when :x86_64 then "amd64"
+    else arch.to_s
     end
 
     assert_match "gamon3 version #{version} #{os}-#{arch}", shell_output("#{bin}/gamon3 --version")
