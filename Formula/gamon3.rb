@@ -21,18 +21,19 @@ class Gamon3 < Formula
       Utils.safe_popen_read("git", "describe", "--tags", "--dirty").chomp
     end
 
-    ldflags = %W[
-      -s -w
-      -X main.version=#{gamon3_version}
-    ]
-
-    system "go", "build", *std_go_args(ldflags: ldflags), "-o", "bin/gamon3"
+    with_env(
+      "GAMON3_VERSION" => gamon3_version,
+    ) do
+      system "make"
+    end
     bin.install "bin/gamon3"
-
     generate_completions_from_executable(bin/"gamon3", "completion")
   end
 
   test do
-    assert_match "gamon3 version #{version}", shell_output("#{bin}/gamon3 --version")
+    os   = OS.mac? ? "darwin" : "linux"
+    arch = Hardware::CPU.arch
+
+    assert_match "gamon3 version #{version} #{os}-#{arch}", shell_output("#{bin}/gamon3 --version")
   end
 end
