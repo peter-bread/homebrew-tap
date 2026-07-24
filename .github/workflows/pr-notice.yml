@@ -8,7 +8,7 @@ on:
 
 jobs:
   add-comment:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-slim
 
     permissions:
       pull-requests: write
