@@ -1,8 +1,8 @@
 class Browserctl < Formula
   desc "Manage default browser on macOS 13 or later"
   homepage "https://github.com/peter-bread/browserctl"
-  url "https://github.com/peter-bread/browserctl/archive/refs/tags/v0.1.1.tar.gz"
-  sha256 "b94aaa820675d3fb3bec1f557d65fcf6164d5084cf38078d044dbb1f12406994"
+  url "https://github.com/peter-bread/browserctl/archive/refs/tags/v0.2.1.tar.gz"
+  sha256 "d347d8be511e7ed4a944de26287b6755a652e05f6c2114de3576172fc8d9d32c"
   license "MIT"
 
   bottle do
