@@ -37,6 +37,6 @@ class Browserctl < Formula
     assert_equal "OVERVIEW: A utility to manage default browser on macOS",
                   shell_output("#{bin}/browserctl --help").lines.first.chomp
 
-    # assert_match "browserctl #{version}", shell_output("#{bin}/browserctl --version")
+    assert_match "browserctl #{version}", shell_output("#{bin}/browserctl --version")
   end
 end
