@@ -68,6 +68,12 @@ Edit the formula with `brew edit`.
 brew edit peter-bread/tap/<formula>
 ```
 
+> [!TIP]
+> Use these to help you write the formula:
+>
+> - https://docs.brew.sh/Formula-Cookbook
+> - https://docs.brew.sh/rubydoc/Formula
+
 Create a new branch, add the formula, then commit and push to the tap.
 
 ```bash
