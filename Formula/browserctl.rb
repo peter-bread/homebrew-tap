@@ -6,10 +6,10 @@ class Browserctl < Formula
   license "MIT"
 
   bottle do
-    root_url "https://github.com/peter-bread/homebrew-tap/releases/download/browserctl-0.2.2"
-    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "4ba275a9070fd9e12e26ceffdee5d4a6cd5a05c1a8834aa3f07f01595c52d8c3"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "dba4a1081d52106b31c54b792dd88d96c2bb57e2eaaf56c45bd8c9d7cf50733e"
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "71c5962f41c55feee3676b63eb84a6a3a46951fb6c33f1785ec8a32a0e821800"
+    root_url "https://github.com/peter-bread/homebrew-tap/releases/download/browserctl-0.2.3"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d8add0794e13582953aeba252f94cace9c46ff3d5cd6ef62568925499ab765fd"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "7dbe730d7236057ad7b2dce75191c695a627cb0d362779ec4233fb361fcc8362"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "b9884070dded7fdd654230f0166fc7788a002536f22ed51bdaf5bdce42b64a10"
   end
 
   depends_on :macos
