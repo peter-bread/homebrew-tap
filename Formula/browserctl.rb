@@ -7,9 +7,10 @@ class Browserctl < Formula
 
   bottle do
     root_url "https://github.com/peter-bread/homebrew-tap/releases/download/browserctl-0.2.4"
-    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "4630ca34962e70a577e2476f885cbe6c148820137791972afdd9fa2ad57e7dc2"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "66cdd2e9772c0bcfb7fd257205eaeb213023ca408de681c4f82cca08d0c44860"
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "3271ae65d5936bde477260ee4ad7bcafd51fa99e05ede97469603c7640e26e2e"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "1491ed12715afdf0d38154218c405ab8b62172c531909c3eaf357e9c90025412"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "2be8888f7cb1350f25f7ee9c55c674d40911643c8e8770e250a56ca0e6b1f9d0"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "506c68148e4901f00e11fdc4ba5c8559ac3b6bae9713847d0d6c1ffadbb3b397"
   end
 
   depends_on :macos
