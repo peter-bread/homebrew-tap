@@ -20,23 +20,24 @@ class Browserctl < Formula
 
   def install
     browserctl_version = version.to_s
+    build = Pathname(".build")
 
     with_env("BROWSERCTL_VERSION" => browserctl_version) do
-      system "swift", "build", "--disable-sandbox", "-c", "release"
+      system "make", "release"
     end
-    bin.install "./.build/release/browserctl"
+    bin.install build/"release/browserctl"
 
-    system "swift", "package", "--disable-sandbox", "plugin", "generate-manual"
+    system "make", "man"
     man.mkpath
-    man1.install "./.build/plugins/GenerateManual/outputs/browserctl/browserctl.1"
+    man1.install build/"plugins/GenerateManual/outputs/browserctl/browserctl.1"
 
     generate_completions_from_executable(bin/"browserctl", "--generate-completion-script")
   end
 
   test do
     assert_equal "OVERVIEW: A utility to manage default browser on macOS",
-                  shell_output("#{bin}/browserctl --help").lines.first.chomp
+                  shell_output(bin/"browserctl --help").lines.first.chomp
 
-    assert_match "browserctl #{version}", shell_output("#{bin}/browserctl --version")
+    assert_match "browserctl #{version}", shell_output(bin/"browserctl --version")
   end
 end
